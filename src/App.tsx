@@ -328,16 +328,16 @@ export default function App() {
         {/* ===================== HERO ===================== */}
         <section className="relative pt-[120px] md:pt-[150px] pb-16 md:pb-24 overflow-hidden">
           <div className="w-full max-w-[1160px] mx-auto px-6">
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-12 md:gap-16 items-center">
+            <div className="flex flex-col items-center justify-center text-center">
               
               {/* Copywriting Column */}
-              <div className="md:col-span-7 flex flex-col items-start">
+              <div className="w-full max-w-4xl flex flex-col items-center text-center">
                 <motion.span 
                   initial="hidden"
                   animate="visible"
                   variants={fadeInUp}
                   custom={0}
-                  className="font-cap text-[10px] sm:text-xs font-semibold tracking-[0.22em] text-[#73573F] uppercase mb-5"
+                  className="font-cap text-[10px] sm:text-xs font-semibold tracking-[0.22em] text-[#73573F] uppercase mb-5 block text-center"
                 >
                   Locus Living · Governança Patrimonial
                 </motion.span>
@@ -347,33 +347,33 @@ export default function App() {
                   animate="visible"
                   variants={fadeInUp}
                   custom={1}
-                  className="font-display font-medium text-4xl sm:text-5xl lg:text-6xl text-[#3D2F22] leading-[1.12] tracking-tight mb-6 max-w-[20ch]"
+                  className="font-display font-medium text-4xl sm:text-5xl lg:text-6xl text-[#3D2F22] leading-[1.12] tracking-tight mb-6 max-w-[24ch] mx-auto text-center"
                 >
                   Você investiu em um patrimônio. <span className="text-[#73573F] italic font-normal">Quem cuida dele quando você não pode?</span>
                 </motion.h1>
-
+ 
                 <motion.p 
                   initial="hidden"
                   animate="visible"
                   variants={fadeInUp}
                   custom={2}
-                  className="text-[#594432] text-base sm:text-lg lg:text-xl font-light leading-relaxed mb-8 max-w-[50ch]"
+                  className="text-[#594432] text-base sm:text-lg lg:text-xl font-light leading-relaxed mb-8 max-w-[54ch] mx-auto text-center"
                 >
                   Locus Living é a governança que zela pelo seu imóvel como se fosse o nosso: protegido, conservado e sempre pronto. Você recebe de volta o que mais importa: o seu tempo e a sua paz.
                 </motion.p>
-
+ 
                 <motion.div 
                   initial="hidden"
                   animate="visible"
                   variants={fadeInUp}
                   custom={3}
-                  className="flex flex-col sm:flex-row items-stretch sm:items-center gap-5 w-full sm:w-auto"
+                  className="flex flex-col sm:flex-row items-center justify-center gap-5 w-full sm:w-auto"
                 >
                   <a 
                     href="https://forms.gle/CWKbWPZ4U97XgmRx7" 
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-cap text-xs font-bold tracking-wider uppercase bg-[#594432] hover:bg-[#3D2F22] text-[#FAF7F1] px-8 py-4 rounded transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group"
+                    className="font-cap text-xs font-bold tracking-wider uppercase bg-[#594432] hover:bg-[#3D2F22] text-[#FAF7F1] px-8 py-4 rounded transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group w-full sm:w-auto"
                   >
                     Quero proteger meu patrimônio
                     <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
@@ -386,32 +386,6 @@ export default function App() {
                     Conheça o serviço
                     <ChevronDown className="w-4 h-4 animate-bob text-[#73573F]" />
                   </a>
-                </motion.div>
-              </div>
-
-              {/* Art Composition Column */}
-              <div className="md:col-span-5 flex justify-center">
-                <motion.div 
-                  initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                  transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1], delay: 0.3 }}
-                  className="relative w-full max-w-[380px] sm:max-w-[440px] aspect-[5/6]"
-                >
-                  <div className="absolute inset-0 rounded-lg bg-gradient-to-br from-[#F2EBDF] to-[#EADFCD] border border-[#3D2F22]/15 shadow-xl overflow-hidden">
-                    {/* Concentric Geometric Arcs */}
-                    <span className="absolute inset-[8%] rounded-full border border-[#73573F]/20"></span>
-                    <span className="absolute inset-[20%] rounded-full border border-[#73573F]/20"></span>
-                    <span className="absolute inset-[32%] rounded-full border border-[#73573F]/20"></span>
-                    
-                    {/* Floating Key Signature */}
-                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1/3 text-[#594432] drop-shadow-[0_15px_25px_rgba(61,47,34,0.25)] animate-keyfloat">
-                      <KeyIcon />
-                    </div>
-
-                    <span className="absolute left-6 bottom-6 font-cap text-[9px] font-semibold tracking-[0.24em] text-[#73573F] uppercase">
-                      Custódia · Cuidado · Confiança
-                    </span>
-                  </div>
                 </motion.div>
               </div>
 
@@ -967,7 +941,7 @@ export default function App() {
                 <ul className="space-y-3">
                   <li>
                     <a 
-                      href="https://instagram.com" 
+                      href="https://instagram.com/locushost" 
                       target="_blank" 
                       rel="noopener noreferrer" 
                       className="text-sm font-light hover:text-[#FAF7F1] transition-colors flex items-center gap-2"
@@ -978,22 +952,13 @@ export default function App() {
                   </li>
                   <li>
                     <a 
-                      href="https://wa.me/5527999999999" 
+                      href="https://wa.me/5527998956775" 
                       target="_blank" 
                       rel="noopener noreferrer" 
                       className="text-sm font-light hover:text-[#FAF7F1] transition-colors flex items-center gap-2"
                     >
                       <Phone className="w-3.5 h-3.5" />
                       WhatsApp
-                    </a>
-                  </li>
-                  <li>
-                    <a 
-                      href="mailto:contato@locusliving.com.br" 
-                      className="text-sm font-light hover:text-[#FAF7F1] transition-colors flex items-center gap-2"
-                    >
-                      <Mail className="w-3.5 h-3.5" />
-                      E-mail
                     </a>
                   </li>
                 </ul>
