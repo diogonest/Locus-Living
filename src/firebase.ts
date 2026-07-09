@@ -70,7 +70,12 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
 const LEADS_COLLECTION = 'leads';
 
 // Save lead to Firestore
-export async function saveLeadToFirestore(name: string, contact: string): Promise<Lead> {
+export async function saveLeadToFirestore(
+  name: string, 
+  contact: string,
+  typology?: string,
+  project?: string
+): Promise<Lead> {
   const timestamp = new Date().toLocaleString('pt-BR', { 
     day: '2-digit', 
     month: '2-digit', 
@@ -82,6 +87,8 @@ export async function saveLeadToFirestore(name: string, contact: string): Promis
   const leadData = {
     name,
     contact,
+    typology: typology || '',
+    project: project || '',
     date: timestamp,
     createdAt: new Date().getTime()
   };
@@ -92,7 +99,9 @@ export async function saveLeadToFirestore(name: string, contact: string): Promis
       id: docRef.id,
       name,
       contact,
-      date: timestamp
+      date: timestamp,
+      typology: typology || '',
+      project: project || ''
     };
   } catch (error) {
     handleFirestoreError(error, OperationType.CREATE, LEADS_COLLECTION);
@@ -112,7 +121,9 @@ export async function fetchLeadsFromFirestore(): Promise<Lead[]> {
         id: doc.id,
         name: data.name || '',
         contact: data.contact || '',
-        date: data.date || ''
+        date: data.date || '',
+        typology: data.typology || '',
+        project: data.project || ''
       });
     });
     return leads;

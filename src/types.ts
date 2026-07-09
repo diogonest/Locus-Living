@@ -3,4 +3,6 @@ export interface Lead {
   name: string;
   contact: string;
   date: string;
+  typology?: string;
+  project?: string;
 }

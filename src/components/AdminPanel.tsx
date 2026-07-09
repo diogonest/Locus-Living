@@ -247,7 +247,7 @@ export default function AdminPanel({
             <div className="w-16 h-16 bg-stone-800/80 rounded-full flex items-center justify-center mb-6 border border-stone-700">
               <Lock className="w-8 h-8 text-amber-500/80" />
             </div>
-            <h3 className="text-xl font-display mb-2">Acesso Restrito aos Fundadores</h3>
+            <h3 className="text-xl font-display mb-2">Acesso Restrito de Administração</h3>
             <p className="text-stone-400 text-sm mb-6">
               Diogo & Jennifer, digite a senha de acesso para visualizar e exportar os contatos da lista de espera.
             </p>

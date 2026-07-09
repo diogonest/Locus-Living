@@ -48,7 +48,8 @@ export default function App() {
 
   // Early access form states
   const [formName, setFormName] = useState('');
-  const [formContact, setFormContact] = useState('');
+  const [formTypology, setFormTypology] = useState('');
+  const [formProject, setFormProject] = useState('');
   const [formError, setFormError] = useState('');
   const [formSuccess, setFormSuccess] = useState(false);
   const [isEarlyUnlocked, setIsEarlyUnlocked] = useState(false);
@@ -91,28 +92,40 @@ export default function App() {
     setFormError('');
 
     const trimmedName = formName.trim();
-    const trimmedContact = formContact.trim();
+    const trimmedTypology = formTypology.trim();
+    const trimmedProject = formProject.trim();
 
     if (trimmedName.length < 2) {
       setFormError('Por favor, informe seu nome completo.');
       return;
     }
 
-    // Validation: check for valid email or phone
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const digitCount = (trimmedContact.match(/\d/g) || []).length;
-    const isValid = emailRegex.test(trimmedContact) || digitCount >= 10;
-
-    if (!isValid) {
-      setFormError('Informe um WhatsApp com DDD ou um e-mail válido.');
+    if (trimmedTypology.length < 2) {
+      setFormError('Por favor, informe a tipologia (ex: Apartamento, Cobertura, etc.).');
       return;
     }
 
+    if (trimmedProject.length < 2) {
+      setFormError('Por favor, informe o nome do empreendimento.');
+      return;
+    }
+
+    // Combine info to store in 'contact' field for full backward compatibility
+    const contactString = `Tipologia: ${trimmedTypology} | Empreendimento: ${trimmedProject}`;
+
     try {
       // Save new lead to Firebase Firestore
-      const savedLead = await saveLeadToFirestore(trimmedName, trimmedContact);
+      const savedLead = await saveLeadToFirestore(trimmedName, contactString, trimmedTypology, trimmedProject);
       setLeads(prev => [savedLead, ...prev]);
       setFormSuccess(true);
+
+      // Form WhatsApp URL
+      // Message format: Olá me chamo {nome}, quero mais informações do serviço locus living para um {tipologia} do {nome do empreendimento)
+      const messageText = `Olá me chamo ${trimmedName}, quero mais informações do serviço locus living para um ${trimmedTypology} do ${trimmedProject}`;
+      const whatsappUrl = `https://wa.me/5527998956775?text=${encodeURIComponent(messageText)}`;
+      
+      // Redirect to WhatsApp
+      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
     } catch (err) {
       console.error("Erro ao salvar lead no Firebase:", err);
       setFormError("Ocorreu um erro ao enviar seus dados. Por favor, tente novamente.");
@@ -205,11 +218,11 @@ export default function App() {
     },
     {
       question: 'Quando os valores serão divulgados?',
-      answer: 'Em breve. Quem entrar na lista de fundadores agora será avisado em primeira mão e garante uma condição de entrada exclusiva que não estará disponível para o público geral.'
+      answer: 'Em breve. Quem entrar na lista de espera agora será avisado em primeira mão e garante uma condição especial exclusiva que não estará disponível para o público geral.'
     },
     {
-      question: 'Como funciona o acesso antecipado de fundador?',
-      answer: 'Basta deixar seu contato na lista de espera. Você receberá a comunicação oficial antes de todo mundo, entrará com prioridade absoluta e manterá as vantagens e condições exclusivas de fundador durante toda a permanência.'
+      question: 'Como funciona o acesso antecipado?',
+      answer: 'Basta deixar seu contato na lista de espera. Você receberá a comunicação oficial antes de todo mundo, entrará com prioridade absoluta e manterá as vantagens e a condição especial exclusiva durante toda a permanência.'
     }
   ];
 
@@ -244,7 +257,9 @@ export default function App() {
               <span className="absolute bottom-0 left-0 w-0 h-[1.5px] bg-[#73573F] transition-all duration-300 group-hover:w-full"></span>
             </a>
             <a 
-              href="#acesso-antecipado" 
+              href="https://wa.me/5527998956775" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="font-cap text-[11px] font-bold tracking-wider uppercase bg-[#594432] text-[#FAF7F1] px-5 py-3 rounded hover:bg-[#3D2F22] hover:-translate-y-0.5 transition-all duration-300 shadow-sm hover:shadow-md flex items-center gap-2"
             >
               Falar com a Locus
@@ -296,7 +311,9 @@ export default function App() {
               Acesso Antecipado
             </a>
             <a 
-              href="#acesso-antecipado" 
+              href="https://wa.me/5527998956775" 
+              target="_blank"
+              rel="noopener noreferrer"
               onClick={() => setIsMenuOpen(false)}
               className="mt-6 font-cap text-xs font-bold tracking-wider uppercase bg-[#594432] text-[#FAF7F1] py-4 rounded text-center block"
             >
@@ -353,7 +370,9 @@ export default function App() {
                   className="flex flex-col sm:flex-row items-stretch sm:items-center gap-5 w-full sm:w-auto"
                 >
                   <a 
-                    href="#acesso-antecipado" 
+                    href="https://forms.gle/CWKbWPZ4U97XgmRx7" 
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="font-cap text-xs font-bold tracking-wider uppercase bg-[#594432] hover:bg-[#3D2F22] text-[#FAF7F1] px-8 py-4 rounded transition-all duration-300 hover:-translate-y-0.5 shadow-md hover:shadow-lg flex items-center justify-center gap-2 group"
                   >
                     Quero proteger meu patrimônio
@@ -639,7 +658,7 @@ export default function App() {
             >
               Diogo Oliveira Santos &amp; Jennifer Stefani Nascimento Soares
               <span className="block font-normal tracking-[0.24em] text-[9px] uppercase mt-2.5 opacity-80 text-[#73573F]">
-                Fundadores da Locus
+                Idealizadores da Locus
               </span>
             </motion.div>
 
@@ -697,7 +716,7 @@ export default function App() {
                   </span>
                   <div>
                     <span className="font-cap text-[10px] font-bold tracking-widest text-[#D9C8B4] uppercase block mb-0.5">
-                      Condição de Fundador
+                      Condição Especial
                     </span>
                     <span className="font-display text-lg text-[#FAF7F1]">
                       Acesso privilegiado antes do lançamento
@@ -721,7 +740,7 @@ export default function App() {
                 <ul className="space-y-4">
                   <li className="flex gap-3 text-sm font-light text-[#FAF7F1]/95">
                     <Check className="w-5 h-5 text-[#D9C8B4] flex-shrink-0 mt-0.5" />
-                    <span>Condição de fundador com desconto garantida de forma vitalícia.</span>
+                    <span>Garantia vitalícia de atendimento e benefícios exclusivos associados a esta condição especial.</span>
                   </li>
                   <li className="flex gap-3 text-sm font-light text-[#FAF7F1]/95">
                     <Check className="w-5 h-5 text-[#D9C8B4] flex-shrink-0 mt-0.5" />
@@ -740,7 +759,7 @@ export default function App() {
                   /* Form Wrapper */
                   <div className="space-y-5">
                     <h3 className="font-display text-xl text-[#FAF7F1] font-medium">
-                      Entre na lista de fundadores
+                      Garanta sua condição especial
                     </h3>
                     <p className="text-[#D9C8B4] text-xs sm:text-sm font-light leading-relaxed mb-6">
                       Deixe seus dados de contato preferidos. Assim que definirmos o cronograma oficial de expansão, entraremos em contato pessoalmente.
@@ -761,25 +780,43 @@ export default function App() {
                             if (formError) setFormError('');
                           }}
                           placeholder="Seu nome completo" 
-                          className="w-full px-4 py-3 rounded text-[#3D2F22] bg-[#FAF7F1] border-1 border-transparent focus:outline-none focus:ring-2 focus:ring-[#D9C8B4] transition-all text-sm font-sans"
+                          className="w-full px-4 py-3 rounded text-[#3D2F22] bg-[#FAF7F1] border border-transparent focus:outline-none focus:ring-2 focus:ring-[#D9C8B4] transition-all text-sm font-sans"
                         />
                       </div>
 
-                      {/* Contact input */}
+                      {/* Typology input */}
                       <div>
-                        <label htmlFor="fContact" className="block font-cap text-[10px] font-semibold tracking-widest text-[#D9C8B4] uppercase mb-2">
-                          WhatsApp ou E-mail
+                        <label htmlFor="fTypology" className="block font-cap text-[10px] font-semibold tracking-widest text-[#D9C8B4] uppercase mb-2">
+                          Tipologia
                         </label>
                         <input 
                           type="text" 
-                          id="fContact" 
-                          value={formContact}
+                          id="fTypology" 
+                          value={formTypology}
                           onChange={(e) => {
-                            setFormContact(e.target.value);
+                            setFormTypology(e.target.value);
                             if (formError) setFormError('');
                           }}
-                          placeholder="(00) 00000-0000 ou voce@email.com" 
-                          className="w-full px-4 py-3 rounded text-[#3D2F22] bg-[#FAF7F1] border-1 border-transparent focus:outline-none focus:ring-2 focus:ring-[#D9C8B4] transition-all text-sm font-sans"
+                          placeholder="Ex: Apartamento, Cobertura, Estúdio" 
+                          className="w-full px-4 py-3 rounded text-[#3D2F22] bg-[#FAF7F1] border border-transparent focus:outline-none focus:ring-2 focus:ring-[#D9C8B4] transition-all text-sm font-sans"
+                        />
+                      </div>
+
+                      {/* Project input */}
+                      <div>
+                        <label htmlFor="fProject" className="block font-cap text-[10px] font-semibold tracking-widest text-[#D9C8B4] uppercase mb-2">
+                          Empreendimento
+                        </label>
+                        <input 
+                          type="text" 
+                          id="fProject" 
+                          value={formProject}
+                          onChange={(e) => {
+                            setFormProject(e.target.value);
+                            if (formError) setFormError('');
+                          }}
+                          placeholder="Nome do condomínio ou prédio" 
+                          className="w-full px-4 py-3 rounded text-[#3D2F22] bg-[#FAF7F1] border border-transparent focus:outline-none focus:ring-2 focus:ring-[#D9C8B4] transition-all text-sm font-sans"
                         />
                       </div>
                     </div>
@@ -795,12 +832,12 @@ export default function App() {
                       onClick={handleFormSubmit}
                       className="w-full py-4 mt-2 bg-[#D9C8B4] text-[#3D2F22] hover:bg-[#FAF7F1] font-bold font-cap text-xs tracking-wider uppercase rounded transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2"
                     >
-                      Quero ser fundador Locus Living
+                      Quero minha condição especial
                       <ArrowRight className="w-4 h-4" />
                     </button>
 
                     <p className="text-[10px] text-[#D9C8B4]/70 leading-relaxed font-sans pt-1">
-                      Sem obrigações. Respeitamos sua privacidade e usaremos seus contatos exclusivamente para notificar sobre sua elegibilidade à condição de fundador.
+                      Sem obrigações. Respeitamos sua privacidade e usaremos seus dados exclusivamente para notificar sobre sua elegibilidade à condição especial.
                     </p>
                   </div>
                 ) : (
@@ -813,17 +850,18 @@ export default function App() {
                       Seu lugar está reservado.
                     </h3>
                     <p className="text-[#D9C8B4] text-sm leading-relaxed max-w-[34ch] font-light">
-                      Obrigado pelo seu interesse! Você será um dos primeiros a receber a confirmação dos valores, com a sua condição de fundador integralmente resguardada.
+                      Obrigado pelo seu interesse! Você será um dos primeiros a receber a confirmação dos valores, com a sua condição especial integralmente resguardada.
                     </p>
                     <button 
                       onClick={() => {
                         setFormSuccess(false);
                         setFormName('');
-                        setFormContact('');
+                        setFormTypology('');
+                        setFormProject('');
                       }}
                       className="mt-8 text-xs font-cap tracking-wider text-[#D9C8B4] underline hover:text-[#FAF7F1] transition-colors"
                     >
-                      Cadastrar outro contato
+                      Cadastrar outra condição especial
                     </button>
                   </div>
                 )}
@@ -861,10 +899,12 @@ export default function App() {
               Seu patrimônio merece esse cuidado. E você merece o seu tempo de volta.
             </h2>
             <p className="text-[#D9C8B4] text-base sm:text-lg font-light leading-relaxed mb-8 max-w-[52ch] mx-auto">
-              Dê o primeiro passo. Garanta a sua condição especial de fundador e deixe o restante da preocupação com a inteligência operacional da Locus.
+              Dê o primeiro passo. Garanta a sua condição especial e deixe o restante da preocupação com a inteligência operacional da Locus.
             </p>
             <a 
-              href="#acesso-antecipado" 
+              href="https://wa.me/5527998956775" 
+              target="_blank"
+              rel="noopener noreferrer"
               className="inline-flex items-center gap-3 font-cap text-xs font-bold tracking-wider uppercase border border-[#D9C8B4] text-[#FAF7F1] hover:bg-[#D9C8B4] hover:text-[#3D2F22] px-8 py-4 rounded transition-all duration-300 hover:-translate-y-0.5 group"
             >
               Falar com a Locus
