@@ -124,8 +124,8 @@ export default function App() {
       const messageText = `Olá me chamo ${trimmedName}, quero mais informações do serviço locus living para um ${trimmedTypology} do ${trimmedProject}`;
       const whatsappUrl = `https://wa.me/5527998956775?text=${encodeURIComponent(messageText)}`;
       
-      // Redirect to WhatsApp
-      window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+      // Redirect to WhatsApp (using window.location.href is reliable on mobile and avoids popup blockers)
+      window.location.href = whatsappUrl;
     } catch (err) {
       console.error("Erro ao salvar lead no Firebase:", err);
       setFormError("Ocorreu um erro ao enviar seus dados. Por favor, tente novamente.");
