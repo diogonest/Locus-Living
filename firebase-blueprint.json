@@ -1,0 +1,35 @@
+{
+  "entities": {
+    "Lead": {
+      "title": "Lead",
+      "description": "Information collected from potential clients looking for patrimonial governance services",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string", "description": "The client's full name" },
+        "contact": { "type": "string", "description": "The email or phone number of the client" },
+        "date": { "type": "string", "description": "Formatted date string when lead was registered" }
+      },
+      "required": ["name", "contact"]
+    },
+    "Setting": {
+      "title": "Setting",
+      "description": "App configurations such as custom logos",
+      "type": "object",
+      "properties": {
+        "base64": { "type": "string", "description": "Base64 dark logo image data" },
+        "lightBase64": { "type": "string", "description": "Base64 light logo image data" }
+      },
+      "required": ["base64"]
+    }
+  },
+  "firestore": {
+    "/leads/{leadId}": {
+      "schema": "Lead",
+      "description": "Collection of all submitted client leads"
+    },
+    "/settings/{settingId}": {
+      "schema": "Setting",
+      "description": "Global or item settings document"
+    }
+  }
+}

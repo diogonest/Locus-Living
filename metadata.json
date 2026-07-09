@@ -1,0 +1,6 @@
+{
+  "name": "Locus Living — Governança Patrimonial",
+  "description": "Locus Living é a governança patrimonial que zela pelo seu imóvel como se fosse o nosso: protegido, conservado e sempre pronto. Tempo para viver. Nós cuidamos do resto.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
