@@ -23,10 +23,7 @@ import { Lead } from './types';
 import { 
   saveLeadToFirestore, 
   fetchLeadsFromFirestore, 
-  deleteLeadFromFirestore,
-  fetchSheetsConfig,
-  getCachedAccessToken,
-  syncLeadsToSpreadsheet
+  deleteLeadFromFirestore
 } from './firebase';
 
 export default function App() {
@@ -59,6 +56,7 @@ export default function App() {
 
   // Early access form states
   const [formName, setFormName] = useState('');
+  const [formContact, setFormContact] = useState('');
   const [formTypology, setFormTypology] = useState('');
   const [formProject, setFormProject] = useState('');
   const [formError, setFormError] = useState('');
@@ -99,15 +97,22 @@ export default function App() {
   }, [leads]);
 
   // Form submission handler
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const handleFormSubmit = async () => {
     setFormError('');
 
     const trimmedName = formName.trim();
+    const trimmedContact = formContact.trim();
     const trimmedTypology = formTypology.trim();
     const trimmedProject = formProject.trim();
 
     if (trimmedName.length < 2) {
       setFormError('Por favor, informe seu nome completo.');
+      return;
+    }
+
+    if (trimmedContact.length < 5) {
+      setFormError('Por favor, informe seu e-mail ou WhatsApp de contato.');
       return;
     }
 
@@ -121,32 +126,25 @@ export default function App() {
       return;
     }
 
-    // Combine info to store in 'contact' field for full backward compatibility
-    const contactString = `Tipologia: ${trimmedTypology} | Empreendimento: ${trimmedProject}`;
-
+    setIsSubmitting(true);
     try {
       // Save new lead to Firebase Firestore
-      const savedLead = await saveLeadToFirestore(trimmedName, contactString, trimmedTypology, trimmedProject);
+      const savedLead = await saveLeadToFirestore(trimmedName, trimmedContact, trimmedTypology, trimmedProject);
       const updatedLeads = [savedLead, ...leads];
       setLeads(updatedLeads);
       setFormSuccess(true);
-
-      // Auto-sync to Google Sheets if connected
-      try {
-        const token = getCachedAccessToken();
-        if (token) {
-          const config = await fetchSheetsConfig();
-          if (config && config.spreadsheetId) {
-            await syncLeadsToSpreadsheet(config.spreadsheetId, updatedLeads, token);
-            console.log("Lead sincronizado automaticamente com o Google Sheets!");
-          }
-        }
-      } catch (sheetErr) {
-        console.error("Erro ao sincronizar novo lead com Google Sheets automaticamente:", sheetErr);
-      }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Erro ao salvar lead no Firebase:", err);
-      setFormError("Ocorreu um erro ao enviar seus dados. Por favor, tente novamente.");
+      const errorMessage = err?.message || '';
+      if (errorMessage.includes('Timeout')) {
+        setFormError("Erro de conexão (Timeout). O banco de dados do Firebase demorou muito para responder. Verifique se o Firestore está ativo.");
+      } else if (errorMessage.toLowerCase().includes('permission') || errorMessage.toLowerCase().includes('insufficient')) {
+        setFormError("Erro de permissão. As regras de segurança do Firebase estão bloqueando o envio de dados.");
+      } else {
+        setFormError("Ocorreu um erro ao enviar seus dados. Por favor, verifique a conexão com o banco de dados Firebase.");
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -776,6 +774,24 @@ export default function App() {
                         />
                       </div>
 
+                      {/* Contact input */}
+                      <div>
+                        <label htmlFor="fContact" className="block font-cap text-[10px] font-semibold tracking-widest text-[#D9C8B4] uppercase mb-2">
+                          Contato (E-mail ou WhatsApp)
+                        </label>
+                        <input 
+                          type="text" 
+                          id="fContact" 
+                          value={formContact}
+                          onChange={(e) => {
+                            setFormContact(e.target.value);
+                            if (formError) setFormError('');
+                          }}
+                          placeholder="Ex: (27) 99841-2050 ou seu@email.com" 
+                          className="w-full px-4 py-3 rounded text-[#3D2F22] bg-[#FAF7F1] border border-transparent focus:outline-none focus:ring-2 focus:ring-[#D9C8B4] transition-all text-sm font-sans"
+                        />
+                      </div>
+
                       {/* Typology input */}
                       <div>
                         <label htmlFor="fTypology" className="block font-cap text-[10px] font-semibold tracking-widest text-[#D9C8B4] uppercase mb-2">
@@ -822,9 +838,10 @@ export default function App() {
 
                     <button 
                       onClick={handleFormSubmit}
-                      className="w-full py-4 mt-2 bg-[#D9C8B4] text-[#3D2F22] hover:bg-[#FAF7F1] font-bold font-cap text-xs tracking-wider uppercase rounded transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                      disabled={isSubmitting}
+                      className="w-full py-4 mt-2 bg-[#D9C8B4] text-[#3D2F22] hover:bg-[#FAF7F1] disabled:bg-[#D9C8B4]/50 font-bold font-cap text-xs tracking-wider uppercase rounded transition-all duration-300 hover:-translate-y-0.5 flex items-center justify-center gap-2"
                     >
-                      Quero minha condição especial
+                      {isSubmitting ? 'Enviando...' : 'Quero minha condição especial'}
                       <ArrowRight className="w-4 h-4" />
                     </button>
 
@@ -839,15 +856,16 @@ export default function App() {
                       <Check className="w-8 h-8 stroke-[2.5]" />
                     </span>
                     <h3 className="font-display text-2xl text-[#FAF7F1] mb-3 font-semibold">
-                      Seu lugar está reservado.
+                      Dados recebidos com sucesso!
                     </h3>
                     <p className="text-[#D9C8B4] text-sm leading-relaxed max-w-[34ch] font-light">
-                      Obrigado pelo seu interesse! Você será um dos primeiros a receber a confirmação dos valores, com a sua condição especial integralmente resguardada.
+                      Obrigado pelo seu interesse! Seus dados foram cadastrados e, em breve, nossa equipe entrará em contato com você.
                     </p>
                     <button 
                       onClick={() => {
                         setFormSuccess(false);
                         setFormName('');
+                        setFormContact('');
                         setFormTypology('');
                         setFormProject('');
                       }}

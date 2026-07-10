@@ -80,6 +80,24 @@ function handleFirestoreError(error: unknown, operationType: OperationType, path
   }
 }
 
+// Timeout helper to prevent infinite waiting on Firestore connections
+export function withTimeout<T>(promise: Promise<T>, timeoutMs: number = 6000, operationName: string = 'Operação'): Promise<T> {
+  let timeoutId: NodeJS.Timeout;
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timeoutId = setTimeout(() => {
+      reject(new Error(`Timeout na operação '${operationName}' após ${timeoutMs / 1000}s. Verifique se o banco de dados do Firebase (Firestore) foi provisionado e se o plano gratuito não atingiu o limite de cotas.`));
+    }, timeoutMs);
+  });
+
+  return Promise.race([
+    promise.then((result) => {
+      clearTimeout(timeoutId);
+      return result;
+    }),
+    timeoutPromise
+  ]);
+}
+
 const LEADS_COLLECTION = 'leads';
 
 // Save lead to Firestore
@@ -107,7 +125,11 @@ export async function saveLeadToFirestore(
   };
 
   try {
-    const docRef = await addDoc(collection(db, LEADS_COLLECTION), leadData);
+    const docRef = await withTimeout(
+      addDoc(collection(db, LEADS_COLLECTION), leadData),
+      6000,
+      'salvar lead'
+    );
     return {
       id: docRef.id,
       name,
@@ -126,7 +148,11 @@ export async function saveLeadToFirestore(
 export async function fetchLeadsFromFirestore(): Promise<Lead[]> {
   try {
     const q = query(collection(db, LEADS_COLLECTION), orderBy('createdAt', 'desc'));
-    const querySnapshot = await getDocs(q);
+    const querySnapshot = await withTimeout(
+      getDocs(q),
+      6000,
+      'buscar leads'
+    );
     const leads: Lead[] = [];
     querySnapshot.forEach((doc) => {
       const data = doc.data();
@@ -149,7 +175,11 @@ export async function fetchLeadsFromFirestore(): Promise<Lead[]> {
 // Delete lead from Firestore
 export async function deleteLeadFromFirestore(id: string): Promise<void> {
   try {
-    await deleteDoc(doc(db, LEADS_COLLECTION, id));
+    await withTimeout(
+      deleteDoc(doc(db, LEADS_COLLECTION, id)),
+      6000,
+      'excluir lead'
+    );
   } catch (error) {
     handleFirestoreError(error, OperationType.DELETE, `${LEADS_COLLECTION}/${id}`);
   }
