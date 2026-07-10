@@ -3,8 +3,8 @@
   "appId": "1:110798952195:web:f3f6ce18616f92738bfb36",
   "apiKey": "AIzaSyBKW5lCPVEHueGrqVtHaFaBE50SsskB79w",
   "authDomain": "gen-lang-client-0512790381.firebaseapp.com",
-  "firestoreDatabaseId": "ai-studio-locuslivinggover-08ab7be4-ec33-4e5c-a36e-3266a6e06060",
   "storageBucket": "gen-lang-client-0512790381.firebasestorage.app",
   "messagingSenderId": "110798952195",
-  "measurementId": ""
+  "measurementId": "",
+  "oAuthClientId": "110798952195-lurv96c2icffoh1vpcdlh5l2e740u0it.apps.googleusercontent.com"
 }

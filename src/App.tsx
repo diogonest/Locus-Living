@@ -18,12 +18,23 @@ import {
 import KeyIcon from './components/KeyIcon';
 import Logo from './components/Logo';
 import FAQAccordion from './components/FAQAccordion';
+import AdminPanel from './components/AdminPanel';
 import { Lead } from './types';
-import { saveLeadToFirestore, fetchLeadsFromFirestore, deleteLeadFromFirestore } from './firebase';
+import { 
+  saveLeadToFirestore, 
+  fetchLeadsFromFirestore, 
+  deleteLeadFromFirestore,
+  fetchSheetsConfig,
+  getCachedAccessToken,
+  syncLeadsToSpreadsheet
+} from './firebase';
 
 export default function App() {
   // Mobile Nav Toggle
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  
+  // Admin Panel Toggle
+  const [isAdminOpen, setIsAdminOpen] = useState(false);
   
   // Nav Scroll Style
   const [isScrolled, setIsScrolled] = useState(false);
@@ -116,16 +127,23 @@ export default function App() {
     try {
       // Save new lead to Firebase Firestore
       const savedLead = await saveLeadToFirestore(trimmedName, contactString, trimmedTypology, trimmedProject);
-      setLeads(prev => [savedLead, ...prev]);
+      const updatedLeads = [savedLead, ...leads];
+      setLeads(updatedLeads);
       setFormSuccess(true);
 
-      // Form WhatsApp URL
-      // Message format: Olá me chamo {nome}, quero mais informações do serviço locus living para um {tipologia} do {nome do empreendimento)
-      const messageText = `Olá me chamo ${trimmedName}, quero mais informações do serviço locus living para um ${trimmedTypology} do ${trimmedProject}`;
-      const whatsappUrl = `https://wa.me/5527998956775?text=${encodeURIComponent(messageText)}`;
-      
-      // Redirect to WhatsApp (using window.location.href is reliable on mobile and avoids popup blockers)
-      window.location.href = whatsappUrl;
+      // Auto-sync to Google Sheets if connected
+      try {
+        const token = getCachedAccessToken();
+        if (token) {
+          const config = await fetchSheetsConfig();
+          if (config && config.spreadsheetId) {
+            await syncLeadsToSpreadsheet(config.spreadsheetId, updatedLeads, token);
+            console.log("Lead sincronizado automaticamente com o Google Sheets!");
+          }
+        }
+      } catch (sheetErr) {
+        console.error("Erro ao sincronizar novo lead com Google Sheets automaticamente:", sheetErr);
+      }
     } catch (err) {
       console.error("Erro ao salvar lead no Firebase:", err);
       setFormError("Ocorreu um erro ao enviar seus dados. Por favor, tente novamente.");
@@ -988,11 +1006,27 @@ export default function App() {
               <span className="font-cap text-[10px] text-[#D9C8B4]/70">
                 Governança Patrimonial · Locus Living
               </span>
+              <span className="text-[#D9C8B4]/30">·</span>
+              <button
+                onClick={() => setIsAdminOpen(true)}
+                className="font-cap text-[10px] text-[#D9C8B4]/70 hover:text-[#FAF7F1] underline cursor-pointer transition-colors"
+              >
+                Painel do Administrador
+              </button>
             </div>
           </div>
 
         </div>
       </footer>
+
+      <AdminPanel 
+        isOpen={isAdminOpen} 
+        onClose={() => setIsAdminOpen(false)} 
+        leads={leads}
+        onAddMockLead={handleAddMockLead}
+        onClearLeads={handleClearLeads}
+        onDeleteLead={handleDeleteLead}
+      />
 
     </div>
   );
